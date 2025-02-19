@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import './App.css';
 function App() {
   const [todoList, setTodoList] = useState([
@@ -16,53 +16,34 @@ function App() {
   ]);
   const [fruit, setFruits] = useState([]);
   const [vegetable, setVegetables] = useState([]);
-  const [turn, setTurn] = useState('Fruit');  
+
+  const itemInColumns = useRef(new Set());
 
   const seperateColumns = (e) => {
+    if (itemInColumns.current.has(e.name)) {
+      return;
+    }
+    itemInColumns.current.add(e.name);
     setTodoList((prev) => prev.filter((item) => item.name !== e.name));
     if (e.type === 'Fruit') {
       setFruits((prev) => [...prev, e]);
     } else {
       setVegetables((prev) => [...prev, e]);
     }
+    setTimeout(() => {
+      returnBack(e);
+    }, 5000);
   }
 
   const returnBack = (e) => {
+    if (!itemInColumns.current.has(e.name)) return;
+    itemInColumns.current.delete(e.name);
+    setTodoList((prev) => [...prev, e]);
     if (e.type === 'Fruit' || e.type === 'Vegetable') {
-      setTodoList((prev) => [...prev, e]);
       setFruits((prev) => prev.filter((item) => item.name !== e.name));
       setVegetables((prev) => prev.filter((item) => item.name !== e.name));
     }
   }
-
-  const backFromTable = () => {
-    if (turn === 'Fruit') {
-      if (fruit.length > 0) {
-        const itemToReturnFruits = fruit[0];
-        setFruits((prev) => prev.slice(1));
-        setTodoList((prev) => [...prev, itemToReturnFruits]);
-        setTurn('Vegetable');
-      } else if (vegetable.length > 0) {
-        const itemToReturnVegetables = vegetable[0];
-        setVegetables((prev) => prev.slice(1));
-        setTodoList((prev) => [...prev, itemToReturnVegetables]);
-        setTurn('Fruit'); 
-      }
-    } else if (turn === 'Vegetable') {
-      if (vegetable.length > 0) {
-        const itemToReturnVegetables = vegetable[0];
-        setVegetables((prev) => prev.slice(1));
-        setTodoList((prev) => [...prev, itemToReturnVegetables]);
-        setTurn('Fruit');
-      } else if (fruit.length > 0) {
-        const itemToReturnFruits = fruit[0];
-        setFruits((prev) => prev.slice(1));
-        setTodoList((prev) => [...prev, itemToReturnFruits]);
-        setTurn('Vegetable'); 
-      }
-    }
-  };
-  
 
   const handleButtonClick = (e) => {
     seperateColumns(e);
@@ -77,9 +58,9 @@ function App() {
       <table className="table-layout">
         <thead>
           <tr>
-            <th>To-Do List</th>
-            <th>Fruit Column</th>
-            <th>Vegetable Column</th>
+            <th>Seperate Type</th>
+            <th>Fruit</th>
+            <th>Vegetable</th>
           </tr>
         </thead>
         <tbody>
@@ -91,19 +72,19 @@ function App() {
                 </button>
               ))}
             </td>
-            <td className="column" onClick={() => backFromTable()}>
+            <td className="column">
               <ul>
                 {fruit.map((e, index) => (
-                  <li key={index} onClick={(event) => { event.stopPropagation(); handleButtonReturn(e); }}>
+                  <li key={index} onClick={() =>handleButtonReturn(e)}>
                     {e.name}
                   </li>
                 ))}
               </ul>
             </td>
-            <td className="column" onClick={() => backFromTable()}>
+            <td className="column">
               <ul>
                 {vegetable.map((e, index) => (
-                  <li key={index} onClick={(event) => { event.stopPropagation(); handleButtonReturn(e); }}>
+                  <li key={index} onClick={() =>handleButtonReturn(e)}>
                     {e.name}
                   </li>
                 ))}
