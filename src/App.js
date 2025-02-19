@@ -36,18 +36,33 @@ function App() {
   }
 
   const backFromTable = () => {
-    if (turn === 'Fruit' && fruit.length > 0) {
-      const itemToReturnFruits = fruit[0]; 
-      setFruits((prev) => prev.slice(1)); 
-      setTodoList((prev) => [...prev, itemToReturnFruits]); 
-      setTurn('Vegetable'); 
-    } else if (turn === 'Vegetable' && vegetable.length > 0) {
-      const itemToReturnVegetables = vegetable[0]; 
-      setVegetables((prev) => prev.slice(1)); 
-      setTodoList((prev) => [...prev, itemToReturnVegetables]);
-      setTurn('Fruit'); 
+    if (turn === 'Fruit') {
+      if (fruit.length > 0) {
+        const itemToReturnFruits = fruit[0];
+        setFruits((prev) => prev.slice(1));
+        setTodoList((prev) => [...prev, itemToReturnFruits]);
+        setTurn('Vegetable');
+      } else if (vegetable.length > 0) {
+        const itemToReturnVegetables = vegetable[0];
+        setVegetables((prev) => prev.slice(1));
+        setTodoList((prev) => [...prev, itemToReturnVegetables]);
+        setTurn('Fruit'); 
+      }
+    } else if (turn === 'Vegetable') {
+      if (vegetable.length > 0) {
+        const itemToReturnVegetables = vegetable[0];
+        setVegetables((prev) => prev.slice(1));
+        setTodoList((prev) => [...prev, itemToReturnVegetables]);
+        setTurn('Fruit');
+      } else if (fruit.length > 0) {
+        const itemToReturnFruits = fruit[0];
+        setFruits((prev) => prev.slice(1));
+        setTodoList((prev) => [...prev, itemToReturnFruits]);
+        setTurn('Vegetable'); 
+      }
     }
-  }
+  };
+  
 
   const handleButtonClick = (e) => {
     seperateColumns(e);
