@@ -16,7 +16,6 @@ function App() {
   ]);
   const [fruit, setFruits] = useState([]);
   const [vegetable, setVegetables] = useState([]);
-
   const itemInColumns = useRef(new Set());
 
   const seperateColumns = (e) => {
@@ -39,8 +38,9 @@ function App() {
     if (!itemInColumns.current.has(e.name)) return;
     itemInColumns.current.delete(e.name);
     setTodoList((prev) => [...prev, e]);
-    if (e.type === 'Fruit' || e.type === 'Vegetable') {
+    if (e.type === 'Fruit') {
       setFruits((prev) => prev.filter((item) => item.name !== e.name));
+    } else {
       setVegetables((prev) => prev.filter((item) => item.name !== e.name));
     }
   }
