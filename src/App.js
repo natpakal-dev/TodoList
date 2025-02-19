@@ -79,7 +79,7 @@ function App() {
             <td className="column" onClick={() => backFromTable()}>
               <ul>
                 {fruit.map((e, index) => (
-                  <li key={index} onClick={() => handleButtonReturn(e)}>
+                  <li key={index} onClick={(event) => { event.stopPropagation(); handleButtonReturn(e); }}>
                     {e.name}
                   </li>
                 ))}
@@ -88,7 +88,7 @@ function App() {
             <td className="column" onClick={() => backFromTable()}>
               <ul>
                 {vegetable.map((e, index) => (
-                  <li key={index} onClick={() => handleButtonReturn(e)}>
+                  <li key={index} onClick={(event) => { event.stopPropagation(); handleButtonReturn(e); }}>
                     {e.name}
                   </li>
                 ))}
