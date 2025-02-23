@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
 import './App.css';
+
 function App() {
   const [todoList, setTodoList] = useState([
     { type: 'Fruit', name: 'Apple' },
@@ -17,44 +18,71 @@ function App() {
   const [fruit, setFruits] = useState([]);
   const [vegetable, setVegetables] = useState([]);
   const itemInColumns = useRef(new Set());
+  const timersRef = useRef({});
+  const pendingItemsRef = useRef({});
 
-  const seperateColumns = (e) => {
-    if (itemInColumns.current.has(e.name)) {
-      return;
-    }
-    itemInColumns.current.add(e.name);
-    setTodoList((prev) => prev.filter((item) => item.name !== e.name));
-    if (e.type === 'Fruit') {
-      setFruits((prev) => [...prev, e]);
+  const seperateColumns = (item) => {
+    if (itemInColumns.current.has(item.name)) return;
+    itemInColumns.current.add(item.name);
+    pendingItemsRef.current[item.name] = item;
+    setTodoList((prev) => prev.filter((i) => i.name !== item.name));
+    if (item.type === 'Fruit') {
+      setFruits((prev) => [...prev, item]);
     } else {
-      setVegetables((prev) => [...prev, e]);
+      setVegetables((prev) => [...prev, item]);
     }
-    setTimeout(() => {
-      returnBack(e);
+    const timerId = setTimeout(() => {
+      returnBackItem(item, false);
     }, 5000);
-  }
-
-  const returnBack = (e) => {
-    if (!itemInColumns.current.has(e.name)) return;
-    itemInColumns.current.delete(e.name);
-    setTodoList((prev) => [...prev, e]);
-    if (e.type === 'Fruit') {
-      setFruits((prev) => prev.filter((item) => item.name !== e.name));
-    } else {
-      setVegetables((prev) => prev.filter((item) => item.name !== e.name));
-    }
-  }
-
-  const handleButtonClick = (e) => {
-    seperateColumns(e);
+    timersRef.current[item.name] = timerId;
   };
 
-  const handleButtonReturn = (e) => {
-    returnBack(e);
+  /**
+   * @param {object} item
+   * @param {boolean} isManual 
+   */
+
+  const returnBackItem = (item, isManual = false) => {
+    if (timersRef.current[item.name]) {
+      clearTimeout(timersRef.current[item.name]);
+      delete timersRef.current[item.name];
+    }
+    if (!itemInColumns.current.has(item.name)) return;
+    itemInColumns.current.delete(item.name);
+    delete pendingItemsRef.current[item.name];
+    setTodoList((prev) => [...prev, item]);
+    if (item.type === 'Fruit') {
+      setFruits((prev) => prev.filter((i) => i.name !== item.name));
+    } else {
+      setVegetables((prev) => prev.filter((i) => i.name !== item.name));
+    }
+    if (isManual) {
+      let delay = 0
+      Object.keys(pendingItemsRef.current).forEach((name) => {
+        if (timersRef.current[name]) {
+          clearTimeout(timersRef.current[name]);
+        }
+        delay += 100
+        const pendingItem = pendingItemsRef.current[name];
+        const newTimerId = setTimeout(() => {
+          returnBackItem(pendingItem, false)
+        }, 5000 + delay)
+
+        timersRef.current[name] = newTimerId
+      });
+    }
+  };
+
+  const handleButtonReturn = (item) => {
+    returnBackItem(item, true);
+  };
+
+  const handleButtonClick = (item) => {
+    seperateColumns(item);
   };
 
   return (
-    <div className='App'>
+    <div className="App">
       <table className="table-layout">
         <thead>
           <tr>
@@ -66,26 +94,26 @@ function App() {
         <tbody>
           <tr>
             <td className="todo-list">
-              {todoList.map((e, index) => (
-                <button key={index} onClick={() => handleButtonClick(e)}>
-                  {e.name}
+              {todoList.map((item, index) => (
+                <button key={index} onClick={() => handleButtonClick(item)}>
+                  {item.name}
                 </button>
               ))}
             </td>
             <td className="column">
               <ul>
-                {fruit.map((e, index) => (
-                  <li key={index} onClick={() =>handleButtonReturn(e)}>
-                    {e.name}
+                {fruit.map((item, index) => (
+                  <li key={index} onClick={() => handleButtonReturn(item)}>
+                    {item.name}
                   </li>
                 ))}
               </ul>
             </td>
             <td className="column">
               <ul>
-                {vegetable.map((e, index) => (
-                  <li key={index} onClick={() =>handleButtonReturn(e)}>
-                    {e.name}
+                {vegetable.map((item, index) => (
+                  <li key={index} onClick={() => handleButtonReturn(item)}>
+                    {item.name}
                   </li>
                 ))}
               </ul>
